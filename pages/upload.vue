@@ -1,41 +1,60 @@
 <template>
-    <div>
-      <input type="file" @change="onFileChange" />
-      <img v-if="imageUrl" :src="imageUrl" alt="Uploaded Image" />
-      <router-link to="/gallery">Go to Gallery</router-link>
-    </div>
-  </template>
-  
-  <script>
-  export default {
-    data() {
-      return {
-        imageUrl: null
-      };
-    },
-    methods: {
-      async onFileChange(event) {
-        const file = event.target.files[0];
-        if (file) {
-          this.imageUrl = URL.createObjectURL(file);
-          await this.uploadFile(file);
-        }
-      },
-      async uploadFile(file) {
-        const formData = new FormData();
-        formData.append("file", file);
-  
-        try {
-          const response = await fetch("/api/upload", {
-            method: "POST",
-            body: formData,
-          });
-          const result = await response.text();
-          console.log(result);
-        } catch (error) {
-          console.error("Error:", error);
-        }
+  <div>
+    <input type="file" @change="onFileChange" />
+    <img v-if="imageUrl" :src="imageUrl" alt="Uploaded Image" class="uploaded-image" />
+    <button @click="uploadFile" :disabled="!selectedFile">Upload</button>
+    <button @click="goToGallery">Go to Gallery</button>
+  </div>
+</template>
+
+<script>
+export default {
+  data() {
+    return {
+      imageUrl: null,
+      selectedFile: null
+    };
+  },
+  methods: {
+    onFileChange(event) {
+      const file = event.target.files[0];
+      if (file) {
+        this.imageUrl = URL.createObjectURL(file);
+        this.selectedFile = file;
       }
+    },
+    async uploadFile() {
+      if (!this.selectedFile) return;
+
+      const formData = new FormData();
+      formData.append("file", this.selectedFile);
+
+      try {
+        const response = await fetch("/api/upload", {
+          method: "POST",
+          body: formData,
+        });
+        const result = await response.text();
+        console.log(result);
+      } catch (error) {
+        console.error("Error:", error);
+      }
+    },
+    goToGallery() {
+      window.location.href = "/gallery";
     }
-  };
-  </script>
+  }
+};
+</script>
+
+<style scoped>
+.uploaded-image {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 20px 0;
+}
+button {
+  margin: 10px;
+}
+</style>
