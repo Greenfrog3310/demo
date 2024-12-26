@@ -1,7 +1,7 @@
 <template>
   <div>
     <input type="file" @change="onFileChange" />
-    <img v-if="imageUrl" :src="imageUrl" alt="Uploaded Image" class="uploaded-image" />
+    <img v-if="imageUrl" :src="imageUrl" alt="Uploaded Image" class="uploaded-image" style="max-width: 300px; max-height: 300px;" />
     <button @click="uploadFile" :disabled="!selectedFile">Upload</button>
     <button @click="goToGallery">Go to Gallery</button>
   </div>
