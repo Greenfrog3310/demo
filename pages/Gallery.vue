@@ -27,10 +27,7 @@ export default {
       try {
         const response = await fetch("/api/images");
         const result = await response.json();
-        this.images = result.map(image => ({
-          name: image.name,
-          url: `/api/images/${image.name}`
-        }));
+        this.images = result;
       } catch (error) {
         console.error("Error fetching images:", error);
       }
