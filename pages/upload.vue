@@ -1,60 +1,70 @@
 <template>
-  <div>
-    <input type="file" @change="onFileChange" />
-    <img v-if="imageUrl" :src="imageUrl" alt="Uploaded Image" class="uploaded-image" style="max-width: 300px; max-height: 300px;" />
-    <button @click="uploadFile" :disabled="!selectedFile">Upload</button>
-    <button @click="goToGallery">Go to Gallery</button>
-  </div>
-</template>
-
-<script>
-export default {
-  data() {
-    return {
-      imageUrl: null,
-      selectedFile: null
-    };
-  },
-  methods: {
-    onFileChange(event) {
-      const file = event.target.files[0];
-      if (file) {
-        this.imageUrl = URL.createObjectURL(file);
-        this.selectedFile = file;
-      }
+    <div>
+      <h1>Upload Image</h1>
+      <input type="file" accept="image/*" @change="onFileChange" />
+      <button @click="uploadFile">Upload</button>
+      <div v-if="message" :class="{'success': isSuccess, 'error': !isSuccess}">
+        {{ message }}
+      </div>
+    </div>
+  </template>
+  
+  <script lang="ts">
+  import { defineComponent } from 'vue';
+  import axios from 'axios';
+  
+  export default defineComponent({
+    data() {
+      return {
+        selectedFile: null as File | null,
+        message: '',
+        isSuccess: false
+      };
     },
-    async uploadFile() {
-      if (!this.selectedFile) return;
-
-      const formData = new FormData();
-      formData.append("file", this.selectedFile);
-
-      try {
-        const response = await fetch("/api/upload", {
-          method: "POST",
-          body: formData,
-        });
-        const result = await response.text();
-        console.log(result);
-      } catch (error) {
-        console.error("Error:", error);
+    methods: {
+      onFileChange(event: Event) {
+        const target = event.target as HTMLInputElement;
+        if (target.files && target.files.length > 0) {
+          this.selectedFile = target.files[0];
+        }
+      },
+      async uploadFile() {
+        if (!this.selectedFile) {
+          alert('Please select an image first!');
+          return;
+        }
+  
+        const formData = new FormData();
+        formData.append('file', this.selectedFile);
+  
+        try {
+          const response = await axios.post('/api/upload', formData, {
+            headers: {
+              'Content-Type': 'multipart/form-data'
+            }
+          });
+          if (response.status === 200) {
+            this.message = 'Image uploaded successfully!';
+            this.isSuccess = true;
+          } else {
+            this.message = `Error uploading image: ${response.statusText}`;  // แก้ไขตรงนี้
+            this.isSuccess = false;
+          }
+        } catch (error) {
+          this.message = `Error uploading image: ${error.message}`;  // แก้ไขตรงนี้
+          this.isSuccess = false;
+        }
       }
-    },
-    goToGallery() {
-      window.location.href = "/gallery";
     }
+  });
+  </script>
+  
+  <style scoped>
+  .success {
+    color: green;
   }
-};
-</script>
-
-<style scoped>
-.uploaded-image {
-  max-width: 100%;
-  height: auto;
-  display: block;
-  margin: 20px 0;
-}
-button {
-  margin: 10px;
-}
-</style>
+  .error {
+    color: red;
+  }
+  </style>
+  

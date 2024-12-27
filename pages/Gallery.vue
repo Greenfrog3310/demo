@@ -1,8 +1,8 @@
 <template>
   <div>
     <h1>Uploaded Images</h1>
-    <div v-if="images.length">
-      <div v-for="image in images" :key="image.name">
+    <div v-if="images.length" class="image-grid">
+      <div v-for="image in images" :key="image.name" class="image-item">
         <img :src="image.url" :alt="image.name" />
       </div>
     </div>
@@ -35,3 +35,16 @@ export default {
   }
 };
 </script>
+
+<style scoped>
+.image-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 10px;
+}
+.image-item img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+</style>
