@@ -1,8 +1,10 @@
 import path from 'path';
 import { promises as fs } from 'fs';
 import exifReader from 'exif-reader';
+import { getStore } from '@netlify/blobs';
+import type { Context } from '@netlify/functions';
 
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async (event, context: Context) => {
   const formData = await readMultipartFormData(event);
   if (!formData) {
     throw createError({ statusCode: 400, statusMessage: 'No file uploaded' });
@@ -40,5 +42,19 @@ export default defineEventHandler(async (event) => {
   const finalFilePath = path.join(imagesDir, file.filename);
   await fs.rename(tempFilePath, finalFilePath);
 
-  return { url: `/images/${file.filename}`, name: file.filename, exifData };
+  // การตั้งค่าค่าใน blob store สำหรับ construction และ beauty
+  const construction = getStore("construction");
+  await construction.set("nails", "For general carpentry");
+
+  const beauty = getStore("beauty");
+  await beauty.set("nails", "For formal events", {
+    metadata: { material: "acrylic", sale: true },
+  });
+
+  return { 
+    url: `/images/${file.filename}`, 
+    name: file.filename, 
+    exifData,
+    message: "Nail blobs set for Construction and Beauty stores"
+  };
 });
